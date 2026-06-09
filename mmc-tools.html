@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMC Dev Toolkit — ADB Command Reference</title>
+  <meta name="description"
+    content="Complete developer reference for MMC IVI ADB commands. Navigation, VHAL configuration, logging, APK deployment, and RVC testing — all powered through mmc.bat." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ── Reset & Tokens ── */
+    :root {
+      --bg: #f5f6fa;
+      --bg2: #ffffff;
+      --bg3: #eef0f6;
+      --card: #ffffff;
+      --border: #e2e5ef;
+      --border-h: #d0d4e2;
+      --accent: #2557d6;
+      --accent-l: #3b6de8;
+      --cyan: #0891b2;
+      --green: #059669;
+      --red: #dc2626;
+      --orange: #d97706;
+      --indigo: #4f46e5;
+      --text: #0f1117;
+      --text-s: #1a1d2b;
+      --muted: #6b7280;
+      --muted-l: #9ca3af;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-h: 0 4px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 72px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background: #2557d620;
+      color: var(--accent);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-h);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted-l);
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: static;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 28px;
+      height: 54px;
+    }
+
+    .nav-logo {
+      height: 36px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .nav-sep {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .nav-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 2px;
+    }
+
+    .nav-links a {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+      background: #2557d608;
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: #2557d60d;
+    }
+
+    /* ── IMP Button & Modal ── */
+    .imp-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-family: var(--font);
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-left: 8px;
+    }
+    
+    .imp-btn:hover {
+      background: #dc2626;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transform: translateY(20px);
+      transition: transform 0.2s ease;
+      font-family: var(--font);
+    }
+    
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    
+    .modal-content h3 {
+      margin-top: 0;
+      color: #111827;
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
+    .modal-content p {
+      color: #4b5563;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    
+    .modal-close {
+      background: #111827;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      font-family: var(--font);
+    }
+    
+    .modal-close:hover {
+      background: #374151;
+    }
+
+    /* ── Layout ── */
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 56px 0 48px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .hero-logo {
+      height: 60px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .hero-logo-sep {
+      width: 1px;
+      height: 44px;
+      background: var(--border);
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text);
+      letter-spacing: -0.8px;
+      margin-bottom: 10px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto 24px;
+    }
+
+    .hero-sub code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--bg3);
+      padding: 2px 7px;
+      border-radius: 5px;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    .hero-chips {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .chip {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .chip-accent {
+      background: #2557d60d;
+      border-color: #2557d630;
+      color: var(--accent);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(37, 87, 214, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-l);
+      box-shadow: 0 4px 14px rgba(37, 87, 214, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      background: transparent;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--border-h);
+      background: var(--bg2);
+    }
+
+    .btn-ghost code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--bg3);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* ── Sections ── */
+    .section {
+      padding: 36px 0 12px;
+    }
+
+    .sec-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .sec-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .si-blue {
+      background: #eff4ff;
+      border: 1px solid #c7d7fd;
+    }
+
+    .si-cyan {
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+    }
+
+    .si-green {
+      background: #f0fdf4;
+      border: 1px solid #a7f3d0;
+    }
+
+    .si-red {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+
+    .si-orange {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+
+    .si-indigo {
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+    }
+
+    .sec-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sec-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+
+    .sec-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .sec-desc code {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: var(--bg3);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    .sec-file {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      background: #eff4ff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #c7d7fd;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Card Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      transition: all 0.18s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-h);
+      transform: translateY(-1px);
+    }
+
+    /* Category left-border colors */
+    .card.cat-nav {
+      border-left-color: var(--accent);
+    }
+
+    .card.cat-nav:hover {
+      border-left-color: #3b6de8;
+    }
+
+    .card.cat-launch {
+      border-left-color: var(--cyan);
+    }
+
+    .card.cat-launch:hover {
+      border-left-color: #06b6d4;
+    }
+
+    .card.cat-tire {
+      border-left-color: var(--orange);
+    }
+
+    .card.cat-tire:hover {
+      border-left-color: #f59e0b;
+    }
+
+    .card.cat-log {
+      border-left-color: var(--red);
+    }
+
+    .card.cat-log:hover {
+      border-left-color: #ef4444;
+    }
+
+    .card.cat-apk {
+      border-left-color: var(--green);
+    }
+
+    .card.cat-apk:hover {
+      border-left-color: #10b981;
+    }
+
+    .card.cat-vhal {
+      border-left-color: var(--indigo);
+    }
+
+    .card.cat-vhal:hover {
+      border-left-color: #6366f1;
+    }
+
+    .card.cat-screenshot {
+      border-left-color: var(--cyan);
+    }
+
+    .card.cat-screenshot:hover {
+      border-left-color: #06b6d4;
+    }
+
+    .card.cat-rvc {
+      border-left-color: var(--red);
+    }
+
+    .card.cat-rvc:hover {
+      border-left-color: #ef4444;
+    }
+
+    .card.cat-inject {
+      border-left-color: var(--green);
+    }
+
+    .card.cat-inject:hover {
+      border-left-color: #10b981;
+    }
+
+    .card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .cmd {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      background: #eff4ff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #c7d7fd;
+      white-space: nowrap;
+    }
+
+    .tag {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tag-nav {
+      background: #eff4ff;
+      color: #2557d6;
+      border: 1px solid #c7d7fd;
+    }
+
+    .tag-launch {
+      background: #ecfeff;
+      color: #0891b2;
+      border: 1px solid #a5f3fc;
+    }
+
+    .tag-tire {
+      background: #fffbeb;
+      color: #d97706;
+      border: 1px solid #fde68a;
+    }
+
+    .tag-log {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .tag-apk {
+      background: #f0fdf4;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+
+    .tag-vhal {
+      background: #eef2ff;
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+    }
+
+    .tag-screenshot {
+      background: #ecfeff;
+      color: #0891b2;
+      border: 1px solid #a5f3fc;
+    }
+
+    .tag-rvc {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .tag-inject {
+      background: #f0fdf4;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-desc strong {
+      color: var(--text-s);
+      font-weight: 600;
+    }
+
+    .card-desc code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--bg3);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Steps ── */
+    .steps {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .sn {
+      min-width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted-l);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Notice/Warning ── */
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 7px;
+      margin-top: 10px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      font-size: 11px;
+      color: #92400e;
+      line-height: 1.5;
+    }
+
+    .notice-icon {
+      font-size: 13px;
+      flex-shrink: 0;
+      margin-top: 0;
+    }
+
+    /* ── Byte Map ── */
+    .byte-map {
+      display: flex;
+      gap: 3px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .byte-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 5px 7px;
+      border-radius: 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      min-width: 42px;
+      transition: all 0.15s ease;
+    }
+
+    .byte-cell.active {
+      background: #eef2ff;
+      border-color: #a5b4fc;
+      box-shadow: 0 0 0 2px #4f46e510;
+    }
+
+    .byte-val {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .byte-cell.active .byte-val {
+      color: var(--indigo);
+    }
+
+    .byte-idx {
+      font-size: 8px;
+      color: var(--muted-l);
+      margin-top: 2px;
+      letter-spacing: 0.3px;
+    }
+
+    .byte-label {
+      font-size: 8px;
+      font-weight: 700;
+      color: var(--indigo);
+      margin-top: 1px;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Language grid ── */
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .lang-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      transition: all 0.12s ease;
+    }
+
+    .lang-item:hover {
+      border-color: var(--border-h);
+      background: #f8f9fd;
+    }
+
+    .lang-code {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--indigo);
+      font-weight: 600;
+      min-width: 30px;
+    }
+
+    .lang-name {
+      color: var(--text-s);
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    /* ── RVC table ── */
+    .rvc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+
+    .rvc-table th {
+      text-align: left;
+      padding: 7px 12px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      background: var(--bg3);
+    }
+
+    .rvc-table th:first-child {
+      border-radius: 6px 0 0 0;
+    }
+
+    .rvc-table th:last-child {
+      border-radius: 0 6px 0 0;
+    }
+
+    .rvc-table td {
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .rvc-table td:first-child {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      width: 36px;
+    }
+
+    .rvc-table td:nth-child(2) {
+      color: var(--text-s);
+      font-weight: 500;
+    }
+
+    .rvc-table td code {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: var(--bg3);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    .rvc-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .rvc-table tr:hover td {
+      background: #f8f9fd;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0 36px;
+      text-align: center;
+      margin-top: 36px;
+      background: var(--bg2);
+    }
+
+    .footer-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .footer-logo {
+      height: 30px;
+      opacity: 0.4;
+      transition: opacity 0.15s ease;
+    }
+
+    .footer-logo:hover {
+      opacity: 0.7;
+    }
+
+    .footer-sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+    }
+
+    footer p {
+      font-size: 11px;
+      color: var(--muted-l);
+      line-height: 1.7;
+    }
+
+    footer strong {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .footer-build {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted-l);
+      margin-top: 4px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .nav-inner {
+        padding: 0 16px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .wrap {
+        padding: 0 16px;
+      }
+
+      .hero {
+        padding: 40px 0 36px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sec-head {
+        flex-wrap: wrap;
+      }
+
+      .sec-file {
+        margin-top: 4px;
+      }
+
+      .byte-map {
+        gap: 2px;
+      }
+
+      .byte-cell {
+        min-width: 36px;
+        padding: 4px 5px;
+      }
+
+      .lang-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+    }
+
+    /* ── Fade-in animation ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: fadeUp 0.4s ease both;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  <nav>
+    <div class="nav-inner">
+      <img src="mmclogo.png" class="nav-logo" alt="MMC" />
+      <div class="nav-sep"></div>
+      <img src="visteonlogo.png" class="nav-logo" alt="Visteon" />
+      <div class="nav-sep"></div>
+      <span class="nav-title">MMC Dev Toolkit</span>
+      <div class="nav-links">
+        <a href="#commands">Commands</a>
+        <button class="imp-btn" onclick="openModal()">IMP</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+
+    <!-- ═══════════════════════ HERO ═══════════════════════ -->
+    <div class="hero">
+      <div class="hero-logos">
+        <img src="mmclogo.png" class="hero-logo" alt="MMC" />
+        <div class="hero-logo-sep"></div>
+        <img src="visteonlogo.png" class="hero-logo" alt="Visteon" />
+      </div>
+
+      <h1>MMC ADB <span>Command Reference</span></h1>
+
+      <p class="hero-sub">Complete reference for all MMC IVI developer commands — powered through a single
+        <code>mmc.bat</code> toolkit.
+      </p>
+
+      <div class="hero-chips">
+        <span class="chip chip-accent">MMC IVI 5P45</span>
+        <span class="chip">MY2027</span>
+        <span class="chip">EP32428</span>
+      </div>
+
+      <div class="hero-actions">
+        <a href="mmc-tools.zip" download class="btn-primary" id="download-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3" />
+            <path d="M2 12v1.5a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V12" />
+          </svg>
+          Download Toolkit
+        </a>
+        <span class="btn-ghost"><code>mmc-tools.zip</code></span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ MMC COMMANDS ═══════════════════════ -->
+    <div class="section" id="commands">
+      <div class="sec-head">
+        <div class="sec-icon si-blue">⚡</div>
+        <div class="sec-info">
+          <div class="sec-name">MMC Commands</div>
+          <div class="sec-desc">Core ADB launcher — navigation, settings, logging, APK deployment</div>
+        </div>
+        <span class="sec-file">mmc.bat</span>
+      </div>
+
+      <div class="grid">
+
+        <!-- Navigation commands -->
+        <div class="card cat-nav">
+          <div class="card-head"><span class="cmd">mmc home</span><span class="tag tag-nav">Navigation</span></div>
+          <div class="card-desc">Sends a <strong>Home key press</strong> via car service custom input injection (key
+            codes <code>1016</code> &amp; <code>1017</code>).</div>
+        </div>
+
+        <div class="card cat-nav">
+          <div class="card-head"><span class="cmd">mmc media</span><span class="tag tag-nav">Navigation</span></div>
+          <div class="card-desc">Sends a <strong>Media key press</strong> to switch to the media screen (key codes
+            <code>1022</code> &amp; <code>1023</code>).
+          </div>
+        </div>
+
+        <div class="card cat-nav">
+          <div class="card-head"><span class="cmd">mmc tel</span><span class="tag tag-nav">Navigation</span></div>
+          <div class="card-desc">Sends a <strong>Tel (Phone) button press</strong> to the IVI (key codes
+            <code>1010</code> &amp; <code>1011</code>).
+          </div>
+        </div>
+
+        <div class="card cat-nav">
+          <div class="card-head"><span class="cmd">mmc vr</span><span class="tag tag-nav">Navigation</span></div>
+          <div class="card-desc">Sends a <strong>VR (Voice Recognition) button press</strong> to the IVI (key codes
+            <code>1008</code> &amp; <code>1009</code>).
+          </div>
+        </div>
+
+        <div class="card cat-nav">
+          <div class="card-head"><span class="cmd">mmc vol</span><span class="tag tag-nav">Navigation</span></div>
+          <div class="card-desc">Sends a <strong>Volume hard key press</strong> to the IVI (key codes <code>1018</code>
+            &amp; <code>1019</code>).</div>
+        </div>
+
+        <!-- Launch -->
+        <div class="card cat-launch">
+          <div class="card-head"><span class="cmd">mmc etm</span><span class="tag tag-launch">Launch</span></div>
+          <div class="card-desc">Launches the <strong>ETM (Engineering Test Menu)</strong> screen —
+            <code>com.mmc.etm/.ETMLandingActivity</code>.
+          </div>
+        </div>
+
+        <!-- Tire Pressure -->
+        <div class="card cat-tire">
+          <div class="card-head"><span class="cmd">mmc tpkpa</span><span class="tag tag-tire">Tire Pressure</span></div>
+          <div class="card-desc">Sets Tire Pressure unit to <strong>KPA</strong> via global settings
+            (<code>pressure_set_value = 1</code>).</div>
+        </div>
+
+        <div class="card cat-tire">
+          <div class="card-head"><span class="cmd">mmc tppsi</span><span class="tag tag-tire">Tire Pressure</span></div>
+          <div class="card-desc">Sets Tire Pressure unit to <strong>PSI</strong> via global settings
+            (<code>pressure_set_value = 2</code>).</div>
+        </div>
+
+        <div class="card cat-tire">
+          <div class="card-head"><span class="cmd">mmc tpbar</span><span class="tag tag-tire">Tire Pressure</span></div>
+          <div class="card-desc">Sets Tire Pressure unit to <strong>Bar</strong> via global settings
+            (<code>pressure_set_value = 3</code>).</div>
+        </div>
+
+        <!-- Logging -->
+        <div class="card cat-log">
+          <div class="card-head"><span class="cmd">mmc logenable</span><span class="tag tag-log">Logging</span></div>
+          <div class="card-desc">Full VST Logger enable flow with reboot cycle.</div>
+          <div class="steps">
+            <div class="step">
+              <div class="sn">1</div>adb root &amp;&amp; adb remount
+            </div>
+            <div class="step">
+              <div class="sn">2</div>adb reboot → wait for device online
+            </div>
+            <div class="step">
+              <div class="sn">3</div>Wait 30s for system to stabilize
+            </div>
+            <div class="step">
+              <div class="sn">4</div>adb root &amp;&amp; adb remount again
+            </div>
+            <div class="step">
+              <div class="sn">5</div>Launch VST Logger → enable HMI Log → power cycle device
+            </div>
+          </div>
+        </div>
+
+        <div class="card cat-log">
+          <div class="card-head"><span class="cmd">mmc shortlog</span><span class="tag tag-log">Logging</span></div>
+          <div class="card-desc">Quick VST Logger launch — <strong>no reboot</strong>. Runs root + remount then opens
+            VST Logger directly. Enable HMI Log and power cycle manually.</div>
+        </div>
+
+        <div class="card cat-log">
+          <div class="card-head"><span class="cmd">mmc logpull &lt;name&gt;</span><span
+              class="tag tag-log">Logging</span></div>
+          <div class="card-desc">Pulls VST logs from device and zips newly pulled files as
+            <strong>&lt;name&gt;.zip</strong>.
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="sn">1</div>adb root &amp;&amp; adb remount
+            </div>
+            <div class="step">
+              <div class="sn">2</div>Records pull timestamp
+            </div>
+            <div class="step">
+              <div class="sn">3</div>adb pull data/vstgloballogcontrol
+            </div>
+            <div class="step">
+              <div class="sn">4</div>Zips only files newer than pull start → <strong>&lt;name&gt;.zip</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="card cat-apk full-width">
+          <div class="card-head"><span class="cmd">mmc push</span><span class="tag tag-apk">APK Deploy</span></div>
+          <div class="card-desc">Finds the latest <strong>app-release.apk</strong> under Downloads, matches it to a repo
+            by keyword, renames in-place and pushes to the correct system partition.</div>
+          <div class="steps">
+            <div class="step">
+              <div class="sn">1</div>Scans <code>%USERPROFILE%\Downloads</code> recursively for most recently modified
+              <strong>app-release.apk</strong>
+            </div>
+            <div class="step">
+              <div class="sn">2</div>Prompts for app keyword — e.g. <code>vehicle</code>, <code>camera</code>,
+              <code>phone</code>
+            </div>
+            <div class="step">
+              <div class="sn">3</div>Matches keyword → repo name (e.g. <strong>MMCVehicleApp</strong>) + partition
+              (<strong>/system_ext/priv-app</strong>)
+            </div>
+            <div class="step">
+              <div class="sn">4</div>Renames <code>app-release.apk</code> → <strong>MMCVehicleApp.apk</strong> in-place
+            </div>
+            <div class="step">
+              <div class="sn">5</div>adb root &amp;&amp; adb remount → adb push → adb shell sync × 3
+            </div>
+            <div class="step">
+              <div class="sn">6</div><strong>Reboot device from POWER button</strong>
+            </div>
+          </div>
+
+          <!-- Repo Dictionary Reference -->
+          <div style="margin-top:14px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-s);margin-bottom:8px;">Supported Keywords &amp; Repo Mapping</div>
+            <table class="rvc-table">
+              <thead>
+                <tr>
+                  <th>Keyword</th>
+                  <th>Repo Name</th>
+                  <th>Partition</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>vehicle</td><td>MMCVehicleApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>media</td><td>MMCMediaPlayer</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>phone</td><td>MMCPhoneApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>setting</td><td>MMCSettingApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>gallery</td><td>MMCGallery</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>launcher</td><td>MMCLauncherApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>etm</td><td>MMCETMApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>camera</td><td>MMCCameraApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>systembar</td><td>MMCSystemBarApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>dialer</td><td>MMCCoreDialer</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>connectivity</td><td>MMCConnectivityUIApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>swupdate</td><td>MMCSWUpdateApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>wallpaper</td><td>MMCWallpaperPlayer</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>callmenu</td><td>MCallMenuApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>custominput</td><td>MMCCustomInputApp</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>carsystemui</td><td>MMC_CarSystemUI</td><td><code>/system_ext/priv-app</code></td></tr>
+                <tr><td>appstore</td><td>MMCAppstore</td><td><code>/system/priv-app</code></td></tr>
+                <tr><td>keyboard</td><td>MMCKeyboardApp</td><td><code>/system/priv-app</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- ═══════════════════════ VHAL CONFIG ═══════════════════════ -->
+    <div class="section" id="vhal">
+      <div class="sec-head">
+        <div class="sec-icon si-indigo">🔧</div>
+        <div class="sec-info">
+          <div class="sec-name">VHAL Configuration</div>
+          <div class="sec-desc">Vehicle type, driving hand, and default language — injected via VHAL property
+            <code>557957193</code>
+          </div>
+        </div>
+        <span class="sec-file">mmc.bat</span>
+      </div>
+
+      <!-- Byte Map Reference -->
+      <div class="card cat-vhal full-width" style="margin-bottom:10px;">
+        <div class="card-head"><span class="cmd">VHAL 557957193 — Byte Map</span><span
+            class="tag tag-vhal">Reference</span></div>
+        <div class="card-desc">All three config commands write to VHAL property <strong>557957193</strong>. Each byte
+          position controls a different field.</div>
+        <div class="byte-map">
+          <div class="byte-cell"><span class="byte-val">0x20</span><span class="byte-idx">idx 0</span></div>
+          <div class="byte-cell"><span class="byte-val">0x03</span><span class="byte-idx">idx 1</span></div>
+          <div class="byte-cell"><span class="byte-val">0x08</span><span class="byte-idx">idx 2</span></div>
+          <div class="byte-cell"><span class="byte-val">0x00</span><span class="byte-idx">idx 3</span></div>
+          <div class="byte-cell"><span class="byte-val">0x00</span><span class="byte-idx">idx 4</span></div>
+          <div class="byte-cell active"><span class="byte-val">VEH</span><span class="byte-idx">idx 5</span><span
+              class="byte-label">VEH_TYPE</span></div>
+          <div class="byte-cell active"><span class="byte-val">DRV</span><span class="byte-idx">idx 6</span><span
+              class="byte-label">DRV_HAND</span></div>
+          <div class="byte-cell active"><span class="byte-val">LANG</span><span class="byte-idx">idx 7</span><span
+              class="byte-label">LANGUAGE</span></div>
+          <div class="byte-cell"><span class="byte-val">0x00</span><span class="byte-idx">idx 8</span></div>
+          <div class="byte-cell"><span class="byte-val">0x00</span><span class="byte-idx">idx 9</span></div>
+          <div class="byte-cell"><span class="byte-val">0x00</span><span class="byte-idx">idx 10</span></div>
+          <div class="byte-cell"><span class="byte-val">0x00</span><span class="byte-idx">idx 11</span></div>
+        </div>
+      </div>
+
+      <div class="grid">
+
+        <!-- Vehicle Type -->
+        <div class="card cat-vhal">
+          <div class="card-head"><span class="cmd">mmc 5p45</span><span class="tag tag-vhal">Vehicle Type</span></div>
+          <div class="card-desc">Sets Vehicle Type to <strong>5P45</strong> — injects <code>0x00</code> at index 5, then
+            kills <code>com.mmc.vehicle</code> process to apply.</div>
+        </div>
+
+        <div class="card cat-vhal">
+          <div class="card-head"><span class="cmd">mmc 5p45v</span><span class="tag tag-vhal">Vehicle Type</span></div>
+          <div class="card-desc">Sets Vehicle Type to <strong>5P45V</strong> — injects <code>0x01</code> at index 5,
+            then kills <code>com.mmc.vehicle</code> process to apply.</div>
+        </div>
+
+        <div class="card cat-vhal">
+          <div class="card-head"><span class="cmd">mmc 5f00</span><span class="tag tag-vhal">Vehicle Type</span></div>
+          <div class="card-desc">Sets Vehicle Type to <strong>5F00</strong> — injects <code>0x02</code> at index 5, then
+            kills <code>com.mmc.vehicle</code> process to apply.</div>
+        </div>
+
+        <!-- Driving Hand -->
+        <div class="card cat-nav">
+          <div class="card-head"><span class="cmd">mmc lhd</span><span class="tag tag-nav">Driving Hand</span></div>
+          <div class="card-desc">Sets Driving Hand to <strong>Left Hand Drive (LHD)</strong> — injects <code>0x00</code>
+            at index 6.
+            <div class="notice"><span class="notice-icon">⚠️</span>Requires a <strong>power reboot</strong> on the
+              device for changes to take effect.</div>
+          </div>
+        </div>
+
+        <div class="card cat-nav">
+          <div class="card-head"><span class="cmd">mmc rhd</span><span class="tag tag-nav">Driving Hand</span></div>
+          <div class="card-desc">Sets Driving Hand to <strong>Right Hand Drive (RHD)</strong> — injects
+            <code>0x01</code> at index 6.
+            <div class="notice"><span class="notice-icon">⚠️</span>Requires a <strong>power reboot</strong> on the
+              device for changes to take effect.</div>
+          </div>
+        </div>
+
+        <!-- Language — full width -->
+        <div class="card cat-apk full-width">
+          <div class="card-head"><span class="cmd">mmc lang &lt;name&gt;</span><span class="tag tag-apk">Language</span>
+          </div>
+          <div class="card-desc">Sets Default Language — injects the corresponding byte at index 7. Run
+            <code>mmc lang</code> without argument for an interactive menu.<br />Example: <code>mmc lang english</code>
+            &nbsp;·&nbsp; <code>mmc lang arabic</code> &nbsp;·&nbsp; <code>mmc lang japanese</code>
+          </div>
+          <div class="lang-grid">
+            <div class="lang-item"><span class="lang-code">0x00</span><span class="lang-name">No Request</span></div>
+            <div class="lang-item"><span class="lang-code">0x01</span><span class="lang-name">Japanese</span></div>
+            <div class="lang-item"><span class="lang-code">0x02</span><span class="lang-name">English</span></div>
+            <div class="lang-item"><span class="lang-code">0x03</span><span class="lang-name">French</span></div>
+            <div class="lang-item"><span class="lang-code">0x04</span><span class="lang-name">Spanish</span></div>
+            <div class="lang-item"><span class="lang-code">0x05</span><span class="lang-name">German</span></div>
+            <div class="lang-item"><span class="lang-code">0x06</span><span class="lang-name">Portuguese</span></div>
+            <div class="lang-item"><span class="lang-code">0x07</span><span class="lang-name">Dutch</span></div>
+            <div class="lang-item"><span class="lang-code">0x08</span><span class="lang-name">Italian</span></div>
+            <div class="lang-item"><span class="lang-code">0x09</span><span class="lang-name">Swedish</span></div>
+            <div class="lang-item"><span class="lang-code">0x0A</span><span class="lang-name">Danish</span></div>
+            <div class="lang-item"><span class="lang-code">0x0B</span><span class="lang-name">Russian</span></div>
+            <div class="lang-item"><span class="lang-code">0x0C</span><span class="lang-name">Chinese</span></div>
+            <div class="lang-item"><span class="lang-code">0x0D</span><span class="lang-name">Arabic</span></div>
+            <div class="lang-item"><span class="lang-code">0x0E</span><span class="lang-name">Vietnamese</span></div>
+            <div class="lang-item"><span class="lang-code">0x0F</span><span class="lang-name">Malay</span></div>
+            <div class="lang-item"><span class="lang-code">0x10</span><span class="lang-name">Thai</span></div>
+            <div class="lang-item"><span class="lang-code">0x11</span><span class="lang-name">Indonesian</span></div>
+            <div class="lang-item"><span class="lang-code">0x12</span><span class="lang-name">Turkish</span></div>
+            <div class="lang-item"><span class="lang-code">0x13</span><span class="lang-name">Ukrainian</span></div>
+          </div>
+          <div class="notice"><span class="notice-icon">⚠️</span>Requires a <strong>power reboot</strong> on the device
+            for language change to take effect.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- ═══════════════════════ UTILITIES ═══════════════════════ -->
+    <div class="section" id="utils">
+      <div class="sec-head">
+        <div class="sec-icon si-orange">🛠️</div>
+        <div class="sec-info">
+          <div class="sec-name">Utilities</div>
+          <div class="sec-desc">Device date, touch indicators and other quick device utilities</div>
+        </div>
+        <span class="sec-file">mmc.bat</span>
+      </div>
+
+      <div class="grid">
+
+        <div class="card cat-tire">
+          <div class="card-head"><span class="cmd">mmc setdate &lt;MM/DD/YYYY&gt;</span><span
+              class="tag tag-tire">Date</span></div>
+          <div class="card-desc">Sets the device date using <strong>US format</strong> (MM/DD/YYYY). Short year also
+            accepted.<br /><br />
+            Examples: <code>mmc setdate 06/07/2026</code> &nbsp;·&nbsp; <code>mmc setdate 6/7/26</code><br /><br />
+            Runs <code>adb root &amp;&amp; adb remount</code>, then picks current system time (HH:MM) and builds the adb format <code>MMDDHHmmYYYY.00</code> automatically.
+          </div>
+        </div>
+
+        <div class="card cat-tire">
+          <div class="card-head"><span class="cmd">mmc showtouch</span><span class="tag tag-tire">Display</span></div>
+          <div class="card-desc">Enables <strong>touch indicators</strong> on the device screen.<br /><br />
+            Runs: <code>adb shell settings put system show_touches 1</code>
+          </div>
+        </div>
+
+        <div class="card cat-tire">
+          <div class="card-head"><span class="cmd">mmc gnss</span><span class="tag tag-tire">System</span></div>
+          <div class="card-desc">Enables <strong>GNSS Simulation</strong> on the device.<br /><br />
+            Runs: <code>adb root &amp;&amp; adb remount</code><br />
+            Runs: <code>adb shell setprop persist.vendor.gnss.simulation 1</code><br />
+            Then automatically reboots the device to apply changes.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- ═══════════════════════ MEDIA CAPTURE ═══════════════════════ -->
+    <div class="section" id="screenshot">
+      <div class="sec-head">
+        <div class="sec-icon si-cyan">📸</div>
+        <div class="sec-info">
+          <div class="sec-name">Media Capture</div>
+          <div class="sec-desc">Capture screenshots and screen recordings from the connected IVI device</div>
+        </div>
+        <span class="sec-file">mmc ss / video</span>
+      </div>
+
+      <div class="grid">
+        <div class="card cat-screenshot">
+          <div class="card-head"><span class="cmd">mmc ss &lt;name&gt;</span><span class="tag tag-screenshot">Screenshot</span></div>
+          <div class="card-desc">Takes <strong>1 screenshot</strong> from the connected device, saved as
+            <strong>&lt;name&gt;.png</strong>. (Defaults to <em>screenshot.png</em> if no name is provided).
+          </div>
+        </div>
+        
+        <div class="card cat-screenshot">
+          <div class="card-head"><span class="cmd">mmc ss &lt;name&gt; &lt;N&gt;</span><span
+              class="tag tag-screenshot">Screenshot</span></div>
+          <div class="card-desc">Takes <strong>N screenshots</strong> in a loop, saved sequentially with an underscore tail 
+            (<strong>&lt;name&gt;_1.png</strong> to <strong>&lt;name&gt;_N.png</strong>).<br /><br />Example:
+            <code>mmc ss home 3</code> captures 3 screenshots.
+          </div>
+        </div>
+
+        <div class="card cat-screenshot">
+          <div class="card-head"><span class="cmd">mmc video &lt;name&gt;</span><span
+              class="tag tag-screenshot">Video</span></div>
+          <div class="card-desc">Records the screen directly to an MP4 file using <strong>scrcpy</strong>.<br /><br />Saves to <strong>&lt;name&gt;.mp4</strong>. Press <strong>Ctrl+C</strong> to stop recording.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- ═══════════════════════ SEEYOU ═══════════════════════ -->
+    <div class="section" id="seeyou">
+      <div class="sec-head">
+        <div class="sec-icon si-green">👁️</div>
+        <div class="sec-info">
+          <div class="sec-name">SeeYou</div>
+          <div class="sec-desc">Vehicle VHAL property injection utility</div>
+        </div>
+        <span class="sec-file">mmc seeyou</span>
+      </div>
+
+      <div class="grid">
+        <div class="card cat-inject">
+          <div class="card-head"><span class="cmd">mmc seeyou</span><span class="tag tag-inject">VHAL Inject</span>
+          </div>
+          <div class="card-desc">Injects VHAL property <code>286265121</code> with value <strong>"extended_on"</strong>
+            into the vehicle HAL interface, repeated <strong>50 times</strong> via <code>adb shell dumpsys</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- ═══════════════════════ RVC TEST ═══════════════════════ -->
+    <div class="section" id="rvc">
+      <div class="sec-head">
+        <div class="sec-icon si-red">🎥</div>
+        <div class="sec-info">
+          <div class="sec-name">RVC Test Menu</div>
+          <div class="sec-desc">Interactive rear-view camera test suite — guidelines, VHAL injection, hardware clicks
+          </div>
+        </div>
+        <span class="sec-file">mmc rvc</span>
+      </div>
+
+      <div class="card cat-rvc full-width">
+        <div class="card-head"><span class="cmd">mmc rvc</span><span class="tag tag-rvc">Interactive Menu</span></div>
+        <div class="card-desc">Opens an interactive numbered menu. Select a test case by entering its number.</div>
+        <table class="rvc-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Option</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Static Guidelines</td>
+              <td>Injects static guideline VHAL props, kills camera process, engage/disengage RVC</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Dynamic Guidelines</td>
+              <td>Sets predictive guideline VHAL, kills camera, engages RVC with dynamic mode</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Dynamic Guidelines + Motion</td>
+              <td>Dynamic guidelines with alternating steering angle injection (−/+ sequence via <code>559972444</code>)
+              </td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>RVC Engage + HW Clicks</td>
+              <td>Engages RVC then toggles visibility via hardware click injection (key codes <code>1014</code> &amp;
+                <code>1015</code>)
+              </td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Camera Settings</td>
+              <td>Launches camera settings via HW inject toggle sequence</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>SVC Test</td>
+              <td>Disables RVC config, injects SVC VHAL event (<code>557875204</code>), transitions back</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Launch ETM</td>
+              <td>Starts <code>com.mmc.etm/.ETMLandingActivity</code></td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Hysteresis Test</td>
+              <td>Tests gear/speed latency logic via sequential VHAL state transitions</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Audio Beep</td>
+              <td>Engages RVC + triggers 4 HW click cycles for beep validation (run option 2 first)</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Enable RVC</td>
+              <td>Direct VHAL inject — <code>557891680 → 2</code></td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Close RVC</td>
+              <td>Direct VHAL inject — <code>557891680 → 1</code></td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>RVC Popup Notification</td>
+              <td>Sets popup overlay VHAL (<code>557957201</code>) then triggers HW click</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>RVC HW Toggle</td>
+              <td>Injects VHAL event <code>557875300 → 8</code> then toggles via HW clicks</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>Reset RVC Popup</td>
+              <td>Clears popup VHAL array (<code>557957201</code> all zeros) then HW click reset</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Exit</td>
+              <td>Returns to main mmc prompt</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer>
+    <div class="footer-logos">
+      <img src="mmclogo.png" class="footer-logo" alt="MMC" />
+      <div class="footer-sep"></div>
+      <img src="visteonlogo.png" class="footer-logo" alt="Visteon" />
+    </div>
+    <p>Built for <strong>MMC IVI 5P45 MY2027</strong> · EP32428 · ADB Developer Toolkit</p>
+    <div class="footer-build">v1.0.0 · mmc.bat</div>
+  </footer>
+
+  <!-- ═══════════════════════ IMP MODAL ═══════════════════════ -->
+  <div id="impModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Important Instructions</h3>
+      <p>Remember to unzip the file and place all contents directly inside your <code>adb</code> folder.</p>
+      <p>You must run all commands from the terminal within that specific folder for them to work.</p>
+      <button onclick="closeModal()" class="modal-close">Got it</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ Active nav highlight on scroll ═══════════════ -->
+  <script>
+    function openModal() {
+      document.getElementById('impModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('impModal').classList.remove('active');
+    }
+
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('impModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    (function () {
+      const links = document.querySelectorAll('.nav-links a');
+      const sections = [];
+      links.forEach(a => {
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (el) sections.push({ el, a });
+      });
+
+      function update() {
+        const scroll = window.scrollY + 80;
+        let active = sections[0];
+        for (const s of sections) {
+          if (s.el.offsetTop <= scroll) active = s;
+        }
+        links.forEach(a => a.classList.remove('active'));
+        if (active) active.a.classList.add('active');
+      }
+
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+  </script>
+
+</body>
+
+</html>
