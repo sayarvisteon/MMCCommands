@@ -243,25 +243,25 @@ set "REPO_NAME="
 set "REPO_PATH="
 
 :: ── /system_ext/priv-app ────────────────────────────────────────────────────
-echo !USER_INPUT! | findstr /i "vehicle"      >nul && set "REPO_NAME=MMCVehicleApp"       & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "media"        >nul && set "REPO_NAME=MMCMediaPlayer"      & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "phone"        >nul && set "REPO_NAME=MMCPhoneApp"         & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "setting"      >nul && set "REPO_NAME=MMCSettingApp"       & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "gallery"      >nul && set "REPO_NAME=MMCGallery"          & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "launcher"     >nul && set "REPO_NAME=MMCLauncherApp"      & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "etm"          >nul && set "REPO_NAME=MMCETMApp"           & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "camera"       >nul && set "REPO_NAME=MMCCameraApp"        & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "systembar"    >nul && set "REPO_NAME=MMCSystemBarApp"     & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "dialer"       >nul && set "REPO_NAME=MMCCoreDialer"       & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "connectivity" >nul && set "REPO_NAME=MMCConnectivityUIApp" & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "swupdate"     >nul && set "REPO_NAME=MMCSWUpdateApp"      & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "wallpaper"    >nul && set "REPO_NAME=MMCWallpaperPlayer"  & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "callmenu"     >nul && set "REPO_NAME=MCallMenuApp"        & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "custominput"  >nul && set "REPO_NAME=MMCCustomInputApp"   & set "REPO_PATH=/system_ext/priv-app"
-echo !USER_INPUT! | findstr /i "carsystemui"  >nul && set "REPO_NAME=MMC_CarSystemUI"     & set "REPO_PATH=/system_ext/priv-app"
+echo !USER_INPUT! | findstr /i "vehicle"      >nul && (set "REPO_NAME=MMCVehicleApp"       & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "media mediaplayer" >nul && (set "REPO_NAME=MMCMediaPlayer"      & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "phone"        >nul && (set "REPO_NAME=MMCPhoneApp"         & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "setting"      >nul && (set "REPO_NAME=MMCSettingApp"       & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "gallery"      >nul && (set "REPO_NAME=MMCGallery"          & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "launcher"     >nul && (set "REPO_NAME=MMCLauncherApp"      & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "etm"          >nul && (set "REPO_NAME=MMCETMApp"           & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "camera"       >nul && (set "REPO_NAME=MMCCameraApp"        & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "systembar"    >nul && (set "REPO_NAME=MMCSystemBarApp"     & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "dialer"       >nul && (set "REPO_NAME=MMCCoreDialer"       & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "connectivity" >nul && (set "REPO_NAME=MMCConnectivityUIApp" & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "swupdate"     >nul && (set "REPO_NAME=MMCSWUpdateApp"      & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "wallpaper"    >nul && (set "REPO_NAME=MMCWallpaperPlayer"  & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "callmenu"     >nul && (set "REPO_NAME=MCallMenuApp"        & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "custominput"  >nul && (set "REPO_NAME=MMCCustomInputApp"   & set "REPO_PATH=/system_ext/priv-app")
+echo !USER_INPUT! | findstr /i "carsystemui"  >nul && (set "REPO_NAME=MMC_CarSystemUI"     & set "REPO_PATH=/system_ext/priv-app")
 :: ── /system/priv-app ────────────────────────────────────────────────────────
-echo !USER_INPUT! | findstr /i "appstore"     >nul && set "REPO_NAME=MMCAppstore"         & set "REPO_PATH=/system/priv-app"
-echo !USER_INPUT! | findstr /i "keyboard"     >nul && set "REPO_NAME=MMCKeyboardApp"      & set "REPO_PATH=/system/priv-app"
+echo !USER_INPUT! | findstr /i "appstore"     >nul && (set "REPO_NAME=MMCAppstore"         & set "REPO_PATH=/system/priv-app")
+echo !USER_INPUT! | findstr /i "keyboard"     >nul && (set "REPO_NAME=MMCKeyboardApp"      & set "REPO_PATH=/system/priv-app")
 :: ── END REPO DICTIONARY ───────────────────────────────────────────────────────
 
 if "!REPO_NAME!"=="" (
