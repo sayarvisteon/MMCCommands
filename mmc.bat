@@ -2,11 +2,13 @@
 setlocal enabledelayedexpansion
 :: MMC ADB Command Launcher
 :: Usage: mmc <command>
-:: Commands: home, media, etm, tel, vr, vol, tpkpa, tppsi, tpbar, logenable, shortlog, logpull, push
+:: Commands: home, power, media, etm, tel, vr, vol, tpkpa, tppsi, tpbar, logenable, shortlog, logpull, push
 
 if "%1"=="" goto help
 if /i "%1 %2"=="mmc home" goto home
 if /i "%1"=="home" goto home
+if /i "%1 %2"=="mmc power" goto power
+if /i "%1"=="power" goto power
 if /i "%1 %2"=="mmc media" goto media
 if /i "%1"=="media" goto media
 if /i "%1 %2"=="mmc etm" goto etm
@@ -70,6 +72,17 @@ if /i "%2"=="lp" (
 ) else (
     echo [MMC] Sending Home key press...
     adb shell cmd car_service inject-custom-input 1016 && adb shell cmd car_service inject-custom-input 1017
+)
+echo [MMC] Done.
+goto end
+
+:power
+if /i "%2"=="lp" (
+    echo [MMC] Sending Power key long press...
+    adb shell cmd car_service inject-custom-input 1012
+) else (
+    echo [MMC] Sending Power key press...
+    adb shell cmd car_service inject-custom-input 1012 && adb shell cmd car_service inject-custom-input 1013
 )
 echo [MMC] Done.
 goto end
@@ -786,6 +799,7 @@ echo  Usage: mmc ^<command^>
 echo.
 echo  Available commands:
 echo    mmc home [lp]     -  Home key press (add lp for Long Press)
+echo    mmc power [lp]    -  Power key press (add lp for Long Press)
 echo    mmc media [lp]    -  Media key press (add lp for Long Press)
 echo    mmc etm           -  Launch ETM Screen
 echo    mmc tel [lp]      -  Tel button press (add lp for Long Press)
